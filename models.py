@@ -92,11 +92,11 @@ class DDoAS(nn.Module):
         self.base_features = nn.Sequential(resnet.conv1,
                                            resnet.bn1,
                                            resnet.relu,
-                                           resnet.maxpool)  # (bs, 64, 56, 56)
-        self.res1 = resnet.layer1  # (bs, 256, 56, 56)
-        self.res2 = resnet.layer2  # (bs, 512, 28, 28)
-        self.res3 = resnet.layer3  # (bs, 1024, 14, 14)
-        self.res4 = resnet.layer4  # (bs, 2048, 7, 7)
+                                           resnet.maxpool)
+        self.res1 = resnet.layer1
+        self.res2 = resnet.layer2
+        self.res3 = resnet.layer3
+        self.res4 = resnet.layer4
 
         # set Dense De-overlap Module
 
@@ -162,7 +162,7 @@ class DDoAS(nn.Module):
         img_poly[..., 1] = img_poly[..., 1] / 56. - 1
 
         bs = ff.size(0)
-        gcn_feature = torch.zeros([bs, ff.size(1), img_poly.size(1)]).to(device)  # (bs, 128, point_num)
+        gcn_feature = torch.zeros([bs, ff.size(1), img_poly.size(1)]).to(device)
         pw = torch.zeros([bs, 1, img_poly.size(1)]).to(device)
 
         for i in range(bs):
@@ -176,7 +176,7 @@ class DDoAS(nn.Module):
 
         #point_center = (torch.min(img_poly, dim=1)[0] + torch.max(img_poly, dim=1)[0]) * 0.5
         #point_center = point_center[:, None]
-        #ct_feature = torch.zeros([batch_size, concat_feature.size(1), point_center.size(1)]).to(device)  # (bs, 128, 1)
+        #ct_feature = torch.zeros([batch_size, concat_feature.size(1), point_center.size(1)]).to(device)
 
         #for j in range(batch_size):
         #    grid = point_center[j:j + 1].unsqueeze(1)
@@ -220,10 +220,10 @@ class DDoAS(nn.Module):
     def forward(self, image, img_poly):
 
         image = self.base_features(image)
-        o1 = self.res1(image)  # (bs, 256, 56, 56)
-        o2 = self.res2(o1)     # (bs, 512, 28, 28)
-        o3 = self.res3(o2)     # (bs, 1024, 14, 14)
-        o4 = self.res4(o3)     # (bs, 2048, 7, 7)
+        o1 = self.res1(image)
+        o2 = self.res2(o1)
+        o3 = self.res3(o2)
+        o4 = self.res4(o3)
 
         # classification branches
         cls_feature = self.avg_pool(o4).view(o4.size(0), -1)
@@ -237,24 +237,24 @@ class DDoAS(nn.Module):
         fo4 = self.enconv4(doo4) + doo1
         fo3 = self.enconv3(doo3) + doo1
         fo2 = self.enconv2(doo2) + doo1
-        ff = self.enff(fo2 + fo3 + fo4)  # (bs, 128, 56, 56)
+        ff = self.enff(fo2 + fo3 + fo4)
 
         # edge supervision branches
-        edge_feature = self.edge_spv(ff)  # (bs, 1, 56, 56)
+        edge_feature = self.edge_spv(ff)
 
         Fatt = self.att_F(ff)
 
         #  Deformation branches
         bilinear_feature, pw = self.get_bilinear_interpolation(ff, Fatt, img_poly)  # (bs, 128, point_num) (bs, 1, point_num)
-        Fatt_bf = bilinear_feature.mul(pw)  # + bilinear_feature
+        Fatt_bf = bilinear_feature.mul(pw)
         img_poly, mi, ma = self.normalize_poly(img_poly)
-        app_features = torch.cat([Fatt_bf, img_poly.permute(0, 2, 1)], dim=1)  # (bs, 130, point_num)
-        #app_features = torch.cat([bilinear_feature, img_poly.permute(0, 2, 1)], dim=1)  # (bs, 130, point_num)
+        app_features = torch.cat([Fatt_bf, img_poly.permute(0, 2, 1)], dim=1)
+        #app_features = torch.cat([bilinear_feature, img_poly.permute(0, 2, 1)], dim=1)
 
 
-        snake_feature = self.snake(app_features)  # (bs, 640, point_num)
+        snake_feature = self.snake(app_features)
 
-        predict_offset = self.prediction(snake_feature).permute(0, 2, 1)  # (bs, point_num, 2)
+        predict_offset = self.prediction(snake_feature).permute(0, 2, 1)
 
         predict_offset = predict_offset * (ma - mi)
 
