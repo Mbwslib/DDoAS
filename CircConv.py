@@ -80,7 +80,7 @@ class AttSnake(nn.Module):
             x = self.__getattr__('circconv'+str(i))(x) + x
             states.append(x)
 
-        state = torch.cat(states, dim=1)  # (bs, 64*8, point_num)
+        state = torch.cat(states, dim=1)
         snake_feature = self.att_point(self.fusion(state))
         #snake_feature = self.fusion(state)
 
