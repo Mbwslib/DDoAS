@@ -1,4 +1,4 @@
-Automated Segmentation of Prohibited Items in X-ray Baggage Images Using Dense De-overlap Attention Snake
+# Automated Segmentation of Prohibited Items in X-ray Baggage Images Using Dense De-overlap Attention Snake
 
 Dataset and Code for "Automated Segmentation of Prohibited Items in X-ray Baggage Images Using Dense De-overlap Attention Snake"
 
