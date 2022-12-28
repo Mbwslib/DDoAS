@@ -4,7 +4,7 @@ Dataset and Code are updated!
 
 [[Paper]](https://ieeexplore.ieee.org/document/9772992) [[Dataset]](https://pan.baidu.com/s/11jMmECsjvW49N1NwLb8iIg?pwd=vnyw)
 
-:smile:All publications using PIXray dataset should cite the paper below:
+:smile:If you find this dataset useful for your research, please cite
 
 ```bibtex
 @ARTICLE{9772992,  
